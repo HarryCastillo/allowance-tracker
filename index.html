@@ -99,7 +99,7 @@
 
     .saldo-card .monto {
       font-family: 'DM Mono', monospace;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 500;
       letter-spacing: -1px;
     }
@@ -359,14 +359,20 @@
 
     let hijaSeleccionada = null;
 
+    function formatearSaldo(saldoStr) {
+      // Recibe "$16,189.34", regresa "$16,189"
+      const num = parseFloat(saldoStr.replace(/[$,]/g, ''));
+      return '$' + Math.round(num).toLocaleString('es-MX');
+    }
+
     // Cargar saldos al inicio
     async function cargarSaldos() {
       try {
         const res = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
         const data = await res.json();
-        document.getElementById('saldo-ana').textContent = data.saldo_ana;
+        document.getElementById('saldo-ana').textContent = formatearSaldo(data.saldo_ana);
         document.getElementById('saldo-ana').classList.remove('cargando');
-        document.getElementById('saldo-emma').textContent = data.saldo_emma;
+        document.getElementById('saldo-emma').textContent = formatearSaldo(data.saldo_emma);
         document.getElementById('saldo-emma').classList.remove('cargando');
       } catch (e) {
         document.getElementById('saldo-ana').textContent = '–';
@@ -404,18 +410,9 @@
       setTimeout(() => t.classList.remove('show'), 3500);
     }
 
-    function actualizarSaldosUI(data) {
-      // Mostrar optimistamente los saldos del POST response
-      if (data.saldo_ana) {
-        document.getElementById('saldo-ana').textContent = data.saldo_ana;
-        document.getElementById('saldo-ana').classList.remove('cargando');
-      }
-      if (data.saldo_emma) {
-        document.getElementById('saldo-emma').textContent = data.saldo_emma;
-        document.getElementById('saldo-emma').classList.remove('cargando');
-      }
-      // Luego recargar desde el script para asegurar saldo vigente
-      setTimeout(cargarSaldos, 1500);
+    async function actualizarSaldosUI() {
+      await new Promise(r => setTimeout(r, 1500));
+      await cargarSaldos();
     }
 
     async function registrarAllowance(quien) {
@@ -429,8 +426,12 @@
       try {
         const data = await enviar(payload);
         if (data.ok) {
-          mostrarToast('✅ Allowance registrado', 'ok');
-          await cargarSaldos();
+          await actualizarSaldosUI();
+          const saldos = {
+            saldo_ana: formatearSaldo(document.getElementById('saldo-ana').textContent),
+            saldo_emma: formatearSaldo(document.getElementById('saldo-emma').textContent)
+          };
+          mostrarToast('✅ Allowance registrado', 'ok', saldos);
         }
       } catch (e) {
         mostrarToast('❌ Error al conectar', 'error');
@@ -466,12 +467,16 @@
       try {
         const data = await enviar(payload);
         if (data.ok) {
-          mostrarToast(`✅ ${concepto} registrado`, 'ok');
+          await actualizarSaldosUI();
+          const saldos = {
+            saldo_ana: formatearSaldo(document.getElementById('saldo-ana').textContent),
+            saldo_emma: formatearSaldo(document.getElementById('saldo-emma').textContent)
+          };
+          mostrarToast(`✅ ${concepto} registrado`, 'ok', saldos);
           document.getElementById('concepto').value = '';
           document.getElementById('monto').value = '';
           hijaSeleccionada = null;
           seleccionarHija(null);
-          await cargarSaldos();
         }
       } catch (e) {
         mostrarToast('❌ Error al conectar', 'error');
