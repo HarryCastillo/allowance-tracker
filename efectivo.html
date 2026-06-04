@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
+  <title>Efectivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: #2e2e2e;
+      --harry: #f97316;
+      --elisa: #9ca3af;
+      --text: #f5f5f5;
+      --muted: #888;
+      --danger: #f87171;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    header .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      margin-top: 4px;
+    }
+
+    /* Saldos */
+    .saldos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .saldo-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .saldo-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .saldo-card.harry::before { background: var(--harry); }
+    .saldo-card.elisa::before { background: var(--elisa); }
+
+    .saldo-card .nombre {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .saldo-card.harry .nombre { color: var(--harry); }
+    .saldo-card.elisa .nombre { color: var(--elisa); }
+
+    .saldo-card .monto {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -1px;
+    }
+
+    .saldo-card .monto.cargando { color: var(--muted); font-size: 18px; }
+
+    /* Tarjeta total */
+    .total-card {
+      width: 100%;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .total-card .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .total-card .monto {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -1px;
+    }
+
+    .total-card .monto.cargando { color: var(--muted); font-size: 16px; }
+
+    /* Secciones */
+    .seccion {
+      width: 100%;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .seccion-header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .seccion-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Toggle gasto/ingreso */
+    .tipo-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .tipo-btn {
+      padding: 14px 8px;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .tipo-btn:active { transform: scale(0.95); }
+    .tipo-btn.selected-gasto { border-color: var(--danger); color: var(--danger); background: #2a1010; }
+    .tipo-btn.selected-ingreso { border-color: #4ade80; color: #4ade80; background: #0f2a18; }
+
+    /* Campos */
+    .campo-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .campo-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      padding: 16px;
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .campo-input:focus { border-color: #555; }
+    .campo-input::placeholder { color: var(--muted); }
+
+    /* Selector de persona */
+    .persona-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .persona-btn {
+      padding: 14px 8px;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .persona-btn:active { transform: scale(0.95); }
+    .persona-btn.selected-harry { border-color: var(--harry); color: var(--harry); background: #2a1500; }
+    .persona-btn.selected-elisa { border-color: var(--elisa); color: var(--elisa); background: #1e1e1e; }
+    .persona-btn.selected-ambos { border-color: #aaa; color: var(--text); background: var(--surface2); }
+
+    /* Botón enviar */
+    .btn-enviar {
+      width: 100%;
+      padding: 20px;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-enviar:active { transform: scale(0.97); }
+    .btn-enviar:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      max-width: 340px;
+      width: 90%;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 100;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.ok { border-color: #4ade80; }
+    .toast.error { border-color: var(--danger); }
+
+    .toast .nuevos-saldos {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .toast .saldo-harry { color: var(--harry); }
+    .toast .saldo-elisa { color: var(--elisa); }
+    .toast .saldo-total { color: var(--text); }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid #444;
+      border-top-color: var(--text);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Efectivo</h1>
+    <div class="subtitle">Harry & Elisa</div>
+  </header>
+
+  <!-- Saldos individuales -->
+  <div class="saldos">
+    <div class="saldo-card harry">
+      <div class="nombre">Harry</div>
+      <div class="monto cargando" id="saldo-harry">...</div>
+    </div>
+    <div class="saldo-card elisa">
+      <div class="nombre">Elisa</div>
+      <div class="monto cargando" id="saldo-elisa">...</div>
+    </div>
+  </div>
+
+  <!-- Saldo total -->
+  <div class="total-card">
+    <span class="label">Total</span>
+    <span class="monto cargando" id="saldo-total">...</span>
+  </div>
+
+  <!-- Registro -->
+  <div class="seccion">
+    <div class="seccion-header">Registrar movimiento</div>
+    <div class="seccion-body">
+
+      <div>
+        <label class="campo-label">Tipo</label>
+        <div class="tipo-selector">
+          <button class="tipo-btn selected-gasto" id="btn-gasto" onclick="seleccionarTipo('gasto')">↓ Gasto</button>
+          <button class="tipo-btn" id="btn-ingreso" onclick="seleccionarTipo('ingreso')">↑ Ingreso</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="campo-label">Concepto</label>
+        <input class="campo-input" type="text" id="concepto" placeholder="Ej. Super" autocomplete="off" autocorrect="off">
+      </div>
+
+      <div>
+        <label class="campo-label">Monto ($)</label>
+        <input class="campo-input" type="number" id="monto" placeholder="500" inputmode="numeric">
+      </div>
+
+      <div>
+        <label class="campo-label">¿A quién?</label>
+        <div class="persona-selector">
+          <button class="persona-btn" id="btn-harry" onclick="seleccionarPersona('harry')">Harry</button>
+          <button class="persona-btn" id="btn-elisa" onclick="seleccionarPersona('elisa')">Elisa</button>
+          <button class="persona-btn" id="btn-ambos" onclick="seleccionarPersona('ambos')">Ambos</button>
+        </div>
+      </div>
+
+      <button class="btn-enviar" id="btn-registrar" onclick="registrar()">Registrar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4-kv8y9fJPPrLUc2F35Yy3fmFs89Y-BSt_4A2GLEtbMjbqG_i85RzakvYA4E9JRitkg/exec';
+
+    let tipoSeleccionado = 'gasto';
+    let personaSeleccionada = null;
+
+    function formatearSaldo(saldoStr) {
+      const num = parseFloat(saldoStr.replace(/[$,]/g, ''));
+      return '$' + Math.round(num).toLocaleString('es-MX');
+    }
+
+    async function cargarSaldos() {
+      try {
+        const res = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
+        const data = await res.json();
+        const elSaldoHarry = document.getElementById('saldo-harry');
+        const elSaldoElisa = document.getElementById('saldo-elisa');
+        const elSaldoTotal = document.getElementById('saldo-total');
+        elSaldoHarry.textContent = formatearSaldo(data.saldo_harry);
+        elSaldoHarry.classList.remove('cargando');
+        elSaldoElisa.textContent = formatearSaldo(data.saldo_elisa);
+        elSaldoElisa.classList.remove('cargando');
+        elSaldoTotal.textContent = formatearSaldo(data.saldo_total);
+        elSaldoTotal.classList.remove('cargando');
+      } catch (e) {
+        document.getElementById('saldo-harry').textContent = '–';
+        document.getElementById('saldo-elisa').textContent = '–';
+        document.getElementById('saldo-total').textContent = '–';
+      }
+    }
+
+    function fechaHoy() {
+      const d = new Date();
+      const meses = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${d.getDate()}-${meses[d.getMonth()]}-${String(d.getFullYear()).slice(2)}`;
+    }
+
+    function seleccionarTipo(tipo) {
+      tipoSeleccionado = tipo;
+      document.getElementById('btn-gasto').className = 'tipo-btn' + (tipo === 'gasto' ? ' selected-gasto' : '');
+      document.getElementById('btn-ingreso').className = 'tipo-btn' + (tipo === 'ingreso' ? ' selected-ingreso' : '');
+    }
+
+    function seleccionarPersona(persona) {
+      personaSeleccionada = persona;
+      document.getElementById('btn-harry').className = 'persona-btn' + (persona === 'harry' ? ' selected-harry' : '');
+      document.getElementById('btn-elisa').className = 'persona-btn' + (persona === 'elisa' ? ' selected-elisa' : '');
+      document.getElementById('btn-ambos').className = 'persona-btn' + (persona === 'ambos' ? ' selected-ambos' : '');
+    }
+
+    async function registrar() {
+      const concepto = document.getElementById('concepto').value.trim();
+      const monto = parseFloat(document.getElementById('monto').value);
+
+      if (!concepto) { mostrarToast('Falta el concepto', 'error'); return; }
+      if (!monto || monto <= 0) { mostrarToast('Falta el monto', 'error'); return; }
+      if (!personaSeleccionada) { mostrarToast('Selecciona a quién', 'error'); return; }
+
+      const valor = tipoSeleccionado === 'gasto' ? -monto : monto;
+
+      const payload = {
+        fecha: fechaHoy(),
+        concepto,
+        harry: (personaSeleccionada === 'harry' || personaSeleccionada === 'ambos') ? valor : null,
+        elisa: (personaSeleccionada === 'elisa' || personaSeleccionada === 'ambos') ? valor : null
+      };
+
+      const btn = document.getElementById('btn-registrar');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Registrando...';
+
+      try {
+        await fetch(SCRIPT_URL, { method: 'POST', cache: 'no-store', body: JSON.stringify(payload) });
+        await new Promise(r => setTimeout(r, 1500));
+        await cargarSaldos();
+
+        const saldos = {
+          saldo_harry: document.getElementById('saldo-harry').textContent,
+          saldo_elisa: document.getElementById('saldo-elisa').textContent,
+          saldo_total: document.getElementById('saldo-total').textContent
+        };
+
+        mostrarToast(`✅ ${concepto} registrado`, 'ok', saldos);
+        document.getElementById('concepto').value = '';
+        document.getElementById('monto').value = '';
+        personaSeleccionada = null;
+        seleccionarPersona(null);
+        seleccionarTipo('gasto');
+      } catch (e) {
+        mostrarToast('❌ Error al conectar', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Registrar';
+      }
+    }
+
+    function mostrarToast(msg, tipo, saldos) {
+      const t = document.getElementById('toast');
+      t.className = `toast ${tipo}`;
+      let html = msg;
+      if (saldos) {
+        html += `<div class="nuevos-saldos">
+          <span class="saldo-harry">Harry ${saldos.saldo_harry}</span>
+          <span class="saldo-elisa">Elisa ${saldos.saldo_elisa}</span>
+          <span class="saldo-total">Total ${saldos.saldo_total}</span>
+        </div>`;
+      }
+      t.innerHTML = html;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4000);
+    }
+
+    cargarSaldos();
+  </script>
+</body>
+</html>
