@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="robots" content="noindex, nofollow">
-  <title>Allowance</title>
+  <title>🪙 Allowance</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0f0f0f;
@@ -26,7 +26,7 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Syne', sans-serif;
+      font-family: 'Nunito', sans-serif;
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
@@ -43,9 +43,10 @@
     }
 
     header h1 {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -1px;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      font-family: 'Nunito', sans-serif;
     }
 
     header .subtitle {
@@ -142,11 +143,7 @@
       border: 1px solid var(--border);
       border-radius: 14px;
       color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
+      font-family: 'Nunito', sans-serif;
       flex-direction: column;
       align-items: center;
       gap: 4px;
@@ -193,7 +190,7 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       color: var(--text);
-      font-family: 'Syne', sans-serif;
+      font-family: 'Nunito', sans-serif;
       font-size: 18px;
       padding: 16px;
       outline: none;
@@ -218,7 +215,7 @@
       border: 2px solid var(--border);
       border-radius: 12px;
       color: var(--muted);
-      font-family: 'Syne', sans-serif;
+      font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
@@ -240,11 +237,11 @@
       color: var(--bg);
       border: none;
       border-radius: 14px;
-      font-family: 'Syne', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
       cursor: pointer;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       transition: opacity 0.15s, transform 0.1s;
     }
 
@@ -324,19 +321,9 @@
     <div class="seccion-header">Allowance dominical</div>
     <div class="seccion-body">
       <button class="btn-allowance ambas" onclick="registrarAllowance('ambas')">
-        <span class="etiqueta">Ambas</span>
+        <span class="etiqueta">Domingo — Ambas</span>
         <span class="monto-label">+$200 c/u</span>
       </button>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button class="btn-allowance solo-ana" onclick="registrarAllowance('ana')">
-          <span class="etiqueta">Solo Ana</span>
-          <span class="monto-label">+$200</span>
-        </button>
-        <button class="btn-allowance solo-emma" onclick="registrarAllowance('emma')">
-          <span class="etiqueta">Solo Emma</span>
-          <span class="monto-label">+$200</span>
-        </button>
-      </div>
     </div>
   </div>
 
